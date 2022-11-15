@@ -1,4 +1,4 @@
-package com.example.phones;
+package com.example.phones.ui;
 
 import android.content.res.Configuration;
 import android.graphics.Typeface;
@@ -20,8 +20,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.phones.R;
 import com.example.phones.model.Phones;
-import com.example.phones.ui.MainViewModel;
 
 public class PhonesFragment extends Fragment {
 

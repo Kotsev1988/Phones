@@ -6,7 +6,7 @@
     android:background="@color/white"
     android:clickable="true"
     android:focusable="true"
-    tools:context=".DatePickerFragment">
+    tools:context=".ui.DatePickerFragment">
 
     <DatePicker
         android:id="@+id/dateSet"

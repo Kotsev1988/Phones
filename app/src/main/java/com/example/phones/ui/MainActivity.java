@@ -1,15 +1,16 @@
-package com.example.phones;
+package com.example.phones.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.res.Configuration;
 import android.os.Bundle;
 
-import com.example.phones.ui.MainViewModel;
+import com.example.phones.R;
+import com.example.phones.model.Phones;
+import com.example.phones.ui.PhonesFragment;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

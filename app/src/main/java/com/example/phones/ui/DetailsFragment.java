@@ -1,4 +1,4 @@
-package com.example.phones;
+package com.example.phones.ui;
 
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.phones.R;
 
 public class DetailsFragment extends Fragment {
 

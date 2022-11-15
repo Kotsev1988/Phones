@@ -13,9 +13,6 @@ import java.util.ArrayList;
 
 public class MainViewModel extends ViewModel {
 
-Phones[] phones;
-
-
     private final MutableLiveData<Phones> phonesVM = new MutableLiveData<>();
     LiveData<Phones> phone1 = phonesVM;
 
@@ -26,10 +23,6 @@ Phones[] phones;
 
     public void updatePhones(Phones phone) {
         System.out.println("PhoneVM1 "+phone.getName());
-        //phone1.getValue().setDate(phone.getDate());
         phonesVM.setValue(phone);
-
-
-
     }
 }
