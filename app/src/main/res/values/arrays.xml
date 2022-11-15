@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="phones">
+        <item>Samsung</item>
+        <item>Iphone</item>
+        <item>Xiaomi</item>
+        <item>Nokia</item>
+        <item>Honor</item>
+    </string-array>
+
+    <string-array name="descriptions">
+        <item>Samsung is cool phone</item>
+        <item>Iphone is popular phone</item>
+        <item>Xiamoi  it is the second largest manufacturer of smartphones in the world, most of which run the MIUI operating system.</item>
+        <item>Nokia is a Finnish multinational telecommunications, information technology, and consumer electronics corporation, established in 1865</item>
+        <item>Honor is is a smartphone brand majority owned by a state-owned enterprise controlled by the municipal government of Shenzhe</item>
+    </string-array>
+
+    <integer-array name="phoneImages">
+        <item>@drawable/samsung</item>
+        <item>@drawable/iphone</item>
+        <item>@drawable/xiaomi</item>
+        <item>@drawable/nokia</item>
+        <item>@drawable/honor</item>
+
+    </integer-array>
+
+</resources>
