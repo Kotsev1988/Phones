@@ -49,6 +49,13 @@ static final String ARGS = "index";
             typedArray1.recycle();
         }
 
+        view.findViewById(R.id.backButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                requireActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
+
     }
 
     public static DetailsFragment newInstance(Phones phones){

@@ -47,9 +47,6 @@ MainViewModel vm;
         Bundle arguments = getArguments();
         date = arguments.getString(ArgTime);
         System.out.println("savedArgs "+date);
-
-
-
         vm = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
         datePicker.init(2020, 02, 01, new DatePicker.OnDateChangedListener() {

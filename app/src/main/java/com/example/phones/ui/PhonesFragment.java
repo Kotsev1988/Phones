@@ -1,9 +1,12 @@
 package com.example.phones.ui;
 
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
+import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -36,6 +39,7 @@ public class PhonesFragment extends Fragment {
     String neme, daty;
     Button aboutApp;
     Phones phone;
+    View viewSeparate;
 
     Phones[] phones = new Phones[]{
             new Phones("Samsung", "Samsung is cool phone", R.drawable.samsung, "14.11.2022"),
@@ -75,7 +79,7 @@ public class PhonesFragment extends Fragment {
                 AboutAppFragment aboutAppFragment = new AboutAppFragment();
                 requireActivity().getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.dateAboutApp, aboutAppFragment)
+                        .replace(R.id.dateFragmnet, aboutAppFragment)
                         .addToBackStack("")
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                         .commit();
@@ -147,14 +151,14 @@ public class PhonesFragment extends Fragment {
                             DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(phones[dateIndex].getName());
 
                             fragmentManager1.beginTransaction()
-                                    .add(R.id.fragmentDetails, datePickerFragment)
+                                    .replace(R.id.fragmentDetails, datePickerFragment)
                                     .addToBackStack("")
                                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                     .commit();
                         } else {
                             DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(phones[dateIndex].getName());
                             fragmentManager1.beginTransaction()
-                                    .add(R.id.dateFragmnet, datePickerFragment)
+                                    .replace(R.id.dateFragmnet, datePickerFragment)
                                     .addToBackStack("")
                                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                     .commit();
@@ -162,9 +166,14 @@ public class PhonesFragment extends Fragment {
 
                     });
 
+                    viewSeparate = new View(PhonesFragment.this.getContext());
+                    LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, 1);
+                    viewSeparate.setLayoutParams(param);
+                    viewSeparate.setBackgroundColor(getResources().getColor(android.R.color.black));
                     layout.addView(nameText);
                     layout.addView(descriptionText);
                     layout.addView(dateText);
+                    layout.addView(viewSeparate);
                     final int index = i;
                     nameText.setOnClickListener(view12 -> {
                        // currentPhone = index;
