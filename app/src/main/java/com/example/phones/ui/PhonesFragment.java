@@ -55,7 +55,7 @@ public class PhonesFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
-            requireActivity().getSupportFragmentManager().popBackStack();
+           // requireActivity().getSupportFragmentManager().popBackStack();
 
         }
     }
@@ -104,6 +104,8 @@ public class PhonesFragment extends Fragment {
         }
 
         if (isLand()) {
+
+
             DetailsFragment detailsFragment = DetailsFragment.newInstance(phone);
 
             requireActivity().getSupportFragmentManager()
@@ -115,6 +117,7 @@ public class PhonesFragment extends Fragment {
         }
         //use this for FragmentResultListener
         //initList(view);
+
         // use this init for modelView
         init(view);
     }
@@ -123,6 +126,7 @@ public class PhonesFragment extends Fragment {
         LinearLayout layout = view.findViewById(R.id.linearLayout);
         FragmentManager fragmentManager1 = PhonesFragment.this.requireActivity().getSupportFragmentManager();
 
+        phone = phones[0];
                 for (int i = 0; i < phones.length; i++) {
                     nameText = new TextView(PhonesFragment.this.getContext());
                     nameText.setText(phones[i].getName());
@@ -178,6 +182,7 @@ public class PhonesFragment extends Fragment {
                     nameText.setOnClickListener(view12 -> {
                        // currentPhone = index;
 
+                        phone = phones[index];
                         System.out.println("Phones id"+phones[index].getImage());
                         PhonesFragment.this.showPhones(phones[index]);
                     });

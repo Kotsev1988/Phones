@@ -22,7 +22,8 @@ static final String ARGS = "index";
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        if (savedInstanceState != null)
+            requireActivity().getSupportFragmentManager().popBackStack();
     }
 
     @Override
@@ -38,7 +39,6 @@ static final String ARGS = "index";
         if (arguments!= null){
             System.out.println("arguments "+arguments.toString());
             Phones phones = arguments.getParcelable(ARGS);
-            System.out.println("phoes data "+phones.getName());
             ImageView imageView = view.findViewById(R.id.imagePhone);
             TextView textView = view.findViewById(R.id.detailsOfPhone);
             TypedArray typedArray = getResources().obtainTypedArray(R.array.phoneImages);
