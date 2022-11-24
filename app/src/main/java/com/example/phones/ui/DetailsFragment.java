@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.phones.R;
+import com.example.phones.model.Phones;
 
 public class DetailsFragment extends Fragment {
 
@@ -35,23 +36,25 @@ static final String ARGS = "index";
         super.onViewCreated(view, savedInstanceState);
         Bundle arguments = getArguments();
         if (arguments!= null){
-            int index = arguments.getInt(ARGS);
+            System.out.println("arguments "+arguments.toString());
+            Phones phones = arguments.getParcelable(ARGS);
+            System.out.println("phoes data "+phones.getName());
             ImageView imageView = view.findViewById(R.id.imagePhone);
             TextView textView = view.findViewById(R.id.detailsOfPhone);
             TypedArray typedArray = getResources().obtainTypedArray(R.array.phoneImages);
-            imageView.setImageResource(typedArray.getResourceId(index, 0));
+            imageView.setImageResource(phones.getImage());
             TypedArray typedArray1 = getResources().obtainTypedArray(R.array.descriptions);
-            textView.setText(typedArray1.getText(index));
+            textView.setText(phones.getDescriptions());
             typedArray.recycle();
             typedArray1.recycle();
         }
 
     }
 
-    public static DetailsFragment newInstance(int index){
+    public static DetailsFragment newInstance(Phones phones){
         DetailsFragment detailsFragment = new DetailsFragment();
         Bundle args = new Bundle();
-        args.putInt(ARGS, index);
+        args.putParcelable(ARGS, phones);
         detailsFragment.setArguments(args);
         return detailsFragment;
     }

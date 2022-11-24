@@ -1,6 +1,9 @@
 package com.example.phones.model;
 
-public class Phones {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Phones implements Parcelable {
     String name;
     String descriptions;
     int image;
@@ -11,6 +14,7 @@ public class Phones {
         this.image = image;
         this.date = date;
     }
+
 
     public String getName() {
         return name;
@@ -42,5 +46,38 @@ public class Phones {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    protected Phones(Parcel in) {
+        name = in.readString();
+        descriptions = in.readString();
+        image = in.readInt();
+        date = in.readString();
+    }
+
+    public static final Creator<Phones> CREATOR = new Creator<Phones>() {
+        @Override
+        public Phones createFromParcel(Parcel in) {
+
+            return new Phones(in);
+        }
+
+        @Override
+        public Phones[] newArray(int size) {
+            return new Phones[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(name);
+        parcel.writeString(descriptions);
+        parcel.writeInt(image);
+        parcel.writeString(date);
     }
 }

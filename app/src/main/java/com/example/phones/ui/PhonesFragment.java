@@ -17,6 +17,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -31,8 +32,10 @@ public class PhonesFragment extends Fragment {
     MainViewModel vm;
 
     private static final String CURRENT_PHONE = "phone";
-    private int currentPhone = 0;
+    //private int currentPhone = 0;
     String neme, daty;
+    Button aboutApp;
+    Phones phone;
 
     Phones[] phones = new Phones[]{
             new Phones("Samsung", "Samsung is cool phone", R.drawable.samsung, "14.11.2022"),
@@ -65,6 +68,20 @@ public class PhonesFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+         aboutApp = (Button)view.findViewById(R.id.buttonAboutApp);
+        aboutApp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AboutAppFragment aboutAppFragment = new AboutAppFragment();
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.dateAboutApp, aboutAppFragment)
+                        .addToBackStack("")
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .commit();
+            }
+        });
+
         vm = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
         //FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
 
@@ -79,11 +96,11 @@ public class PhonesFragment extends Fragment {
         });
 
         if (savedInstanceState != null) {
-            currentPhone = savedInstanceState.getInt(CURRENT_PHONE, 0);
+            phone = savedInstanceState.getParcelable(CURRENT_PHONE);
         }
 
         if (isLand()) {
-            DetailsFragment detailsFragment = DetailsFragment.newInstance(currentPhone);
+            DetailsFragment detailsFragment = DetailsFragment.newInstance(phone);
 
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
@@ -99,7 +116,7 @@ public class PhonesFragment extends Fragment {
     }
 
     private void init(View view){
-        LinearLayout layout = (LinearLayout) view;
+        LinearLayout layout = view.findViewById(R.id.linearLayout);
         FragmentManager fragmentManager1 = PhonesFragment.this.requireActivity().getSupportFragmentManager();
 
                 for (int i = 0; i < phones.length; i++) {
@@ -125,8 +142,10 @@ public class PhonesFragment extends Fragment {
 
                     dateText.setOnClickListener(view1 -> {
 
+
                         if (PhonesFragment.this.isLand()) {
                             DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(phones[dateIndex].getName());
+
                             fragmentManager1.beginTransaction()
                                     .add(R.id.fragmentDetails, datePickerFragment)
                                     .addToBackStack("")
@@ -148,13 +167,15 @@ public class PhonesFragment extends Fragment {
                     layout.addView(dateText);
                     final int index = i;
                     nameText.setOnClickListener(view12 -> {
-                        currentPhone = index;
-                        PhonesFragment.this.showPhones(index);
+                       // currentPhone = index;
+
+                        System.out.println("Phones id"+phones[index].getImage());
+                        PhonesFragment.this.showPhones(phones[index]);
                     });
                 }
     }
 
-    private void initList(View view) {
+  /*  private void initList(View view) {
         LinearLayout layout = (LinearLayout) view;
 
 
@@ -227,14 +248,14 @@ public class PhonesFragment extends Fragment {
             });
 
         }
-    }
+    }*/
 
 
 
-    private void showPhones(int index) {
+    private void showPhones(Phones phones) {
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            DetailsFragment detailsFragment = DetailsFragment.newInstance(index);
+            DetailsFragment detailsFragment = DetailsFragment.newInstance(phones);
 
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
@@ -242,7 +263,7 @@ public class PhonesFragment extends Fragment {
                     .addToBackStack("")
                     .commit();
         } else {
-            DetailsFragment detailsFragment = DetailsFragment.newInstance(index);
+            DetailsFragment detailsFragment = DetailsFragment.newInstance(phones);
 
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
@@ -255,7 +276,8 @@ public class PhonesFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putInt(CURRENT_PHONE, currentPhone);
+       // outState.putInt(CURRENT_PHONE, currentPhone);
+        outState.putParcelable(CURRENT_PHONE, phone);
         super.onSaveInstanceState(outState);
 
     }
