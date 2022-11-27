@@ -80,4 +80,6 @@ public class Phones implements Parcelable {
         parcel.writeInt(image);
         parcel.writeString(date);
     }
+
+
 }

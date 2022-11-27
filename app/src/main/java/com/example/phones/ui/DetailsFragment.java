@@ -1,5 +1,6 @@
 package com.example.phones.ui;
 
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 
@@ -8,6 +9,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -19,6 +23,10 @@ import com.example.phones.model.Phones;
 public class DetailsFragment extends Fragment {
 
 static final String ARGS = "index";
+    private MenuItem menuItem;
+    Phones phones;
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,6 +37,7 @@ static final String ARGS = "index";
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         return inflater.inflate(R.layout.fragment_details, container, false);
     }
 
@@ -38,7 +47,7 @@ static final String ARGS = "index";
         Bundle arguments = getArguments();
         if (arguments!= null){
             System.out.println("arguments "+arguments.toString());
-            Phones phones = arguments.getParcelable(ARGS);
+            phones = arguments.getParcelable(ARGS);
             ImageView imageView = view.findViewById(R.id.imagePhone);
             TextView textView = view.findViewById(R.id.detailsOfPhone);
             TypedArray typedArray = getResources().obtainTypedArray(R.array.phoneImages);
@@ -58,11 +67,51 @@ static final String ARGS = "index";
 
     }
 
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+
+        if (!isLand()) {
+
+            inflater.inflate(R.menu.menu_fragment_details, menu);
+            menuItem = menu.findItem(R.id.action_search);
+            MenuItem menuItemSearchOver = menu.findItem(R.id.searchOver);
+            if (menuItem != null) {
+                menuItem.setVisible(false);
+            }
+
+            if (menuItemSearchOver != null) {
+                menuItemSearchOver.setVisible(false);
+            }
+        }
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_delete){
+            MainViewModel.phonesArrayList.remove(phones);
+            phones = null;
+            for (Fragment fragment: requireActivity().getSupportFragmentManager().getFragments()){
+                if (fragment instanceof PhonesFragment){
+                    ((PhonesFragment)fragment).init();
+                    break;
+                }
+            }
+            requireActivity().getSupportFragmentManager().popBackStack();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     public static DetailsFragment newInstance(Phones phones){
         DetailsFragment detailsFragment = new DetailsFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARGS, phones);
         detailsFragment.setArguments(args);
         return detailsFragment;
+    }
+
+    private boolean isLand() {
+        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 }

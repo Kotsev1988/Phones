@@ -4,4 +4,12 @@
     <string name="hello_blank_fragment">This app about Phones v1.0</string>
     <string name="samsung">Samsung</string>
     <string name="Description">Samsung A 32 is cool Phone</string>
+    <string name="exit">Выход</string>
+    <string name="search">поиск</string>
+    <string name="delete">Удалить</string>
+    <string name="send">Отправить</string>
+    <string name="about">О приложении</string>
+    <string name="header_title">Заголовок</string>
+    <string name="imageText">Изображение</string>
+    <string name="popup_delete">Удалить</string>
 </resources>

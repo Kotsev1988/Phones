@@ -20,7 +20,7 @@ public class DatePickerFragment extends Fragment {
 DatePicker datePicker;
  static final String ArgTime = "TIME";
 String index;
-private String date ;
+private Phones phone;
 MainViewModel vm;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,29 +43,29 @@ MainViewModel vm;
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         Bundle arguments = getArguments();
-        date = arguments.getString(ArgTime);
-        System.out.println("savedArgs "+date);
-        vm = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+        if (arguments!= null) {
 
-        datePicker.init(2020, 02, 01, new DatePicker.OnDateChangedListener() {
-            @Override
-            public void onDateChanged(DatePicker datePicker, int i, int i1, int i2) {
-                Bundle result = new Bundle();
-                result.putString("bundleKey", datePicker.getDayOfMonth()+"."+ datePicker.getMonth()+"."+ datePicker.getYear());
-                result.putString("bundleKeyPhone", date);
-                vm.updatePhones(new Phones(date, "", 0, result.getString("bundleKey")));
-                //requireActivity().getSupportFragmentManager().setFragmentResult("key", result);
-                requireActivity().getSupportFragmentManager().popBackStack();
-            }
-        });
+            phone = arguments.getParcelable(ArgTime);
+            System.out.println("Phone "+phone.getName());
+
+            vm = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+
+            datePicker.init(2020, 02, 01, new DatePicker.OnDateChangedListener() {
+                @Override
+                public void onDateChanged(DatePicker datePicker, int i, int i1, int i2) {
+
+                    vm.setDate(phone, datePicker.getDayOfMonth() + "." + datePicker.getMonth() + "." + datePicker.getYear());
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                }
+            });
+        }
     }
 
-    public static DatePickerFragment newInstance(String index){
+    public static DatePickerFragment newInstance(Phones phones){
         DatePickerFragment datePickerFragment = new DatePickerFragment();
         Bundle args = new Bundle();
-        args.putString(ArgTime, index);
+        args.putParcelable(ArgTime, phones);
         datePickerFragment.setArguments(args);
         return  datePickerFragment;
     }
