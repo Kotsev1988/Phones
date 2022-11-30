@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.phones.R;
 import com.example.phones.model.Phones;
@@ -90,6 +91,7 @@ static final String ARGS = "index";
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_delete){
+            String name = phones.getName();
             MainViewModel.phonesArrayList.remove(phones);
             phones = null;
             for (Fragment fragment: requireActivity().getSupportFragmentManager().getFragments()){
@@ -98,6 +100,7 @@ static final String ARGS = "index";
                     break;
                 }
             }
+            Toast.makeText(requireActivity(), "Заметка "+name+" удалена", Toast.LENGTH_LONG).show();
             requireActivity().getSupportFragmentManager().popBackStack();
         }
         return super.onOptionsItemSelected(item);

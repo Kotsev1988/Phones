@@ -2,17 +2,13 @@ package com.example.phones.ui;
 
 import android.app.Activity;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
-import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentResultListener;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -29,12 +25,12 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.phones.R;
 import com.example.phones.model.Phones;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class PhonesFragment extends Fragment {
 
@@ -151,7 +147,21 @@ public class PhonesFragment extends Fragment {
                 });
                 return true;
             case R.id.action_exit:
-                requireActivity().finish();
+                MyDialogFragmentClose myDialogFragmentClose =   new MyDialogFragmentClose();
+                myDialogFragmentClose.show(requireActivity().getSupportFragmentManager(), "MyDialog");
+                myDialogFragmentClose.setListener(new MyDialogFragmentClose.setListener(){
+
+                    @Override
+                    public void actionPositive(String s) {
+                        requireActivity().finish();
+                    }
+
+                    @Override
+                    public void actionNegative(String s) {
+                        return;
+                    }
+                });
+
                 return true;
 
             case R.id.searchOver:
@@ -168,26 +178,39 @@ public class PhonesFragment extends Fragment {
     }
 
     private void initPopupMenu( TextView view, int index){
-        view.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Activity activity = requireActivity();
-                PopupMenu popupMenu = new PopupMenu(activity, v);
-                activity.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
+        view.setOnLongClickListener(v -> {
+            Activity activity = requireActivity();
+            PopupMenu popupMenu = new PopupMenu(activity, v);
+            activity.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
 
-                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            popupMenu.setOnMenuItemClickListener(menuItem -> {
+
+                MyDialogFragmentDelete myDialogFragment =   new MyDialogFragmentDelete();
+                myDialogFragment.show(requireActivity().getSupportFragmentManager(), "MyDialog");
+                myDialogFragment.setListener(new MyDialogFragmentDelete.setListener(){
+
                     @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
+                    public void actionPositive(String s) {
                         if (menuItem.getItemId() == R.id.popup_delete){
+                            String name = phonesArrayList.get(index).getName();
                             phonesArrayList.remove(index);
                             init();
+                            Toast.makeText(requireActivity(), "Заметка "+name+" удалена", Toast.LENGTH_LONG).show();
                         }
-                        return true;
+                    }
+
+                    @Override
+                    public void actionNegative(String s) {
+                        return;
                     }
                 });
-                popupMenu.show();
+
+
+
                 return true;
-            }
+            });
+            popupMenu.show();
+            return true;
         });
 
 
