@@ -12,6 +12,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -22,12 +24,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.phones.R;
+import com.example.phones.model.OnItemClickListener;
+import com.example.phones.model.PhoneAdapter;
 import com.example.phones.model.Phones;
 
 import java.util.ArrayList;
@@ -39,7 +44,7 @@ public class PhonesFragment extends Fragment {
     TextView dateText;
     MainViewModel vm;
     View dataConteiner;
-    private ArrayList<Phones> phonesArrayList =new ArrayList<>();
+    private ArrayList<Phones> phonesArrayList = new ArrayList<>();
 
     private static final String CURRENT_PHONE = "phone";
 
@@ -50,6 +55,8 @@ public class PhonesFragment extends Fragment {
     EditText search;
     LinearLayout searchLinearLayot;
     Button searchButton;
+    RecyclerView recyclerView;
+    int pos;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,44 +64,76 @@ public class PhonesFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setHasOptionsMenu(true);
+
         View rootView = inflater.inflate(R.layout.fragment_phones, container, false);
+        vm = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+        if (savedInstanceState == null) {
+            if (phonesArrayList.size() == 0) {
+                phonesArrayList = vm.getPhonesArrayList(true);
+            }
+        }else if (savedInstanceState.getString("true")!=null){
+            phonesArrayList = vm.getPhonesArrayList(false);
+        }
+        recyclerView = rootView.findViewById(R.id.recyclerView);
+        initRecyclerView(recyclerView, phonesArrayList);
         return rootView;
     }
 
+    private void initRecyclerView(RecyclerView recyclerView, ArrayList<Phones> phonesArrayList) {
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(linearLayoutManager);
+        PhoneAdapter phoneAdapter = new PhoneAdapter(phonesArrayList);
+        recyclerView.setAdapter(phoneAdapter);
+
+
+        phoneAdapter.setClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                System.out.println("Click On Card " + position + " " + view);
+                phone = phonesArrayList.get(position);
+                pos = position;
+                System.out.println("Position "+pos);
+                showPhones(phonesArrayList.get(position));
+            }
+
+            @Override
+            public void onEditIconClick(View v, int position) {
+                phone = phonesArrayList.get(position);
+                EditFragment editFragment = EditFragment.newInstance(position);
+
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment, editFragment)
+                        .addToBackStack("")
+                        .commit();
+
+
+            }
+
+            @Override
+            public void onLingClick(View v, int pos) {
+
+                initPopupMenu(v, pos);
+            }
+        });
+    }
 
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        /*aboutApp = (Button)view.findViewById(R.id.buttonAboutApp);
-        aboutApp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AboutAppFragment aboutAppFragment = new AboutAppFragment();
-                requireActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.dateFragmnet, aboutAppFragment)
-                        .addToBackStack("")
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                        .commit();
-            }
-        });*/
 
-        vm = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        if (savedInstanceState != null && savedInstanceState.getString("true").matches("true")) {
-            phonesArrayList = vm.getPhonesArrayList(false);
-        } else {
-            phonesArrayList = vm.getPhonesArrayList(true);
-        }
+        phone = phonesArrayList.get(0);
 
         vm.getPhone1().observe(getViewLifecycleOwner(), new Observer<Phones>() {
             @Override
             public void onChanged(Phones phones) {
-               dateText =(TextView) view.findViewWithTag(phones.getName());
-               dateText.setText(phones.getDate());
+                dateText = (TextView) view.findViewWithTag(phones.getName());
+                dateText.setText(phones.getDate());
             }
         });
 
@@ -103,6 +142,7 @@ public class PhonesFragment extends Fragment {
         }
 
         if (isLand()) {
+
             DetailsFragment detailsFragment = DetailsFragment.newInstance(phone);
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
@@ -111,12 +151,6 @@ public class PhonesFragment extends Fragment {
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                     .commit();
         }
-        //use this for FragmentResultListener
-        //initList(view);
-
-        // use this init for modelView
-        dataConteiner = view.findViewById(R.id.linearLayout);
-        init(view);
     }
 
     @Override
@@ -125,11 +159,10 @@ public class PhonesFragment extends Fragment {
     }
 
 
-
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-        switch (id){
+        switch (id) {
             case R.id.action_search:
                 item.setVisible(false);
                 searchLinearLayot = requireActivity().findViewById(R.id.searchLinearLayot);
@@ -147,9 +180,9 @@ public class PhonesFragment extends Fragment {
                 });
                 return true;
             case R.id.action_exit:
-                MyDialogFragmentClose myDialogFragmentClose =   new MyDialogFragmentClose();
+                MyDialogFragmentClose myDialogFragmentClose = new MyDialogFragmentClose();
                 myDialogFragmentClose.show(requireActivity().getSupportFragmentManager(), "MyDialog");
-                myDialogFragmentClose.setListener(new MyDialogFragmentClose.setListener(){
+                myDialogFragmentClose.setListener(new MyDialogFragmentClose.setListener() {
 
                     @Override
                     public void actionPositive(String s) {
@@ -165,19 +198,19 @@ public class PhonesFragment extends Fragment {
                 return true;
 
             case R.id.searchOver:
-                if (search!=null && searchButton!=null && searchLinearLayot!=null) {
+                if (search != null && searchButton != null && searchLinearLayot != null) {
                     search.setVisibility(View.GONE);
                     searchButton.setVisibility(View.GONE);
                     item.setVisible(true);
                     searchLinearLayot.setVisibility(View.GONE);
-                    init(dataConteiner);
+                    // init(dataConteiner);
                 }
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void initPopupMenu( TextView view, int index){
+    private void initPopupMenu(View view, int index) {
         view.setOnLongClickListener(v -> {
             Activity activity = requireActivity();
             PopupMenu popupMenu = new PopupMenu(activity, v);
@@ -185,17 +218,18 @@ public class PhonesFragment extends Fragment {
 
             popupMenu.setOnMenuItemClickListener(menuItem -> {
 
-                MyDialogFragmentDelete myDialogFragment =   new MyDialogFragmentDelete();
+                MyDialogFragmentDelete myDialogFragment = new MyDialogFragmentDelete();
                 myDialogFragment.show(requireActivity().getSupportFragmentManager(), "MyDialog");
-                myDialogFragment.setListener(new MyDialogFragmentDelete.setListener(){
+                myDialogFragment.setListener(new MyDialogFragmentDelete.setListener() {
 
                     @Override
                     public void actionPositive(String s) {
-                        if (menuItem.getItemId() == R.id.popup_delete){
+                        if (menuItem.getItemId() == R.id.popup_delete) {
                             String name = phonesArrayList.get(index).getName();
                             phonesArrayList.remove(index);
                             init();
-                            Toast.makeText(requireActivity(), "Заметка "+name+" удалена", Toast.LENGTH_LONG).show();
+                            phone = phonesArrayList.get(index);
+                            Toast.makeText(requireActivity(), "Заметка " + name + " удалена", Toast.LENGTH_LONG).show();
                         }
                     }
 
@@ -206,7 +240,6 @@ public class PhonesFragment extends Fragment {
                 });
 
 
-
                 return true;
             });
             popupMenu.show();
@@ -214,232 +247,23 @@ public class PhonesFragment extends Fragment {
         });
 
 
+    }
 
+    public void init(){
+        recyclerView.getAdapter().notifyDataSetChanged();
+        phone = phonesArrayList.get(0);
     }
 
     private void searchPhones(String phone) {
-        for (int i = 0; i < phonesArrayList.size() ; i++) {
-            if (phonesArrayList.get(i).getName().equals(phone)){
-                System.out.println("hasMatches "+phonesArrayList.get(i).getName() + " = "+phone);
+        for (int i = 0; i < phonesArrayList.size(); i++) {
+            if (phonesArrayList.get(i).getName().equals(phone)) {
+                System.out.println("hasMatches " + phonesArrayList.get(i).getName() + " = " + phone);
 
-                initAfterSearch(dataConteiner,phonesArrayList.get(i));
+                //initAfterSearch(dataConteiner,phonesArrayList.get(i));
                 break;
             }
         }
     }
-
-    public void init(){
-
-        init(dataConteiner);
-    }
-
-
-
-    private void initAfterSearch(View view, Phones phones){
-        LinearLayout layout = view.findViewById(R.id.linearLayout);
-        layout.removeAllViews();
-        FragmentManager fragmentManager1 = PhonesFragment.this.requireActivity().getSupportFragmentManager();
-
-        phone = phonesArrayList.get(0);
-            nameText = new TextView(PhonesFragment.this.getContext());
-            nameText.setText(phones.getName());
-            nameText.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-            nameText.setTextColor(PhonesFragment.this.getResources().getColor(R.color.black));
-            descriptionText = new TextView(PhonesFragment.this.getContext());
-            descriptionText.setText(phones.getDescriptions());
-            descriptionText.setEllipsize(TextUtils.TruncateAt.END);
-            descriptionText.setLines(1);
-            dateText = new TextView(PhonesFragment.this.getContext());
-
-
-            dateText.setText(phones.getDate());
-            dateText.setTag(phones.getName());
-            dateText.setTextColor(PhonesFragment.this.getResources().getColor(R.color.black));
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            params.setMargins(10, 0, 0, 10);
-            dateText.setLayoutParams(params);
-            dateText.setOnClickListener(view1 -> {
-
-
-                if (PhonesFragment.this.isLand()) {
-                    DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(phones);
-
-                    fragmentManager1.beginTransaction()
-                            .replace(R.id.fragmentDetails, datePickerFragment)
-                            .addToBackStack("")
-                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                            .commit();
-                } else {
-                    DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(phones);
-                    fragmentManager1.beginTransaction()
-                            .replace(R.id.dateFragmnet, datePickerFragment)
-                            .addToBackStack("")
-                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                            .commit();
-                }
-
-            });
-
-            viewSeparate = new View(PhonesFragment.this.getContext());
-            LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, 1);
-            viewSeparate.setLayoutParams(param);
-            viewSeparate.setBackgroundColor(getResources().getColor(android.R.color.black));
-            layout.addView(nameText);
-            layout.addView(descriptionText);
-            layout.addView(dateText);
-            layout.addView(viewSeparate);
-            nameText.setOnClickListener(view12 -> {
-                System.out.println("Phones id"+phones.getImage());
-                PhonesFragment.this.showPhones(phones);
-            });
-
-    }
-    private void init(View view){
-
-        LinearLayout layout = view.findViewById(R.id.linearLayout);
-        layout.removeAllViews();
-        FragmentManager fragmentManager1 = PhonesFragment.this.requireActivity().getSupportFragmentManager();
-
-        phone = phonesArrayList.get(0);
-                for (int i = 0; i < phonesArrayList.size(); i++) {
-                    nameText = new TextView(PhonesFragment.this.getContext());
-                    nameText.setText(phonesArrayList.get(i).getName());
-                    nameText.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-                    nameText.setTextColor(PhonesFragment.this.getResources().getColor(R.color.black));
-                    descriptionText = new TextView(PhonesFragment.this.getContext());
-                    descriptionText.setText(phonesArrayList.get(i).getDescriptions());
-                    descriptionText.setEllipsize(TextUtils.TruncateAt.END);
-                    descriptionText.setLines(1);
-                    dateText = new TextView(PhonesFragment.this.getContext());
-
-
-                    dateText.setText(phonesArrayList.get(i).getDate());
-                    dateText.setTag(phonesArrayList.get(i).getName());
-                    dateText.setTextColor(PhonesFragment.this.getResources().getColor(R.color.black));
-                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    params.setMargins(10, 0, 0, 10);
-                    dateText.setLayoutParams(params);
-                    final int dateIndex = i;
-
-
-                    dateText.setOnClickListener(view1 -> {
-
-
-                        if (PhonesFragment.this.isLand()) {
-                            DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(phonesArrayList.get(dateIndex));
-
-                            fragmentManager1.beginTransaction()
-                                    .replace(R.id.fragmentDetails, datePickerFragment)
-                                    .addToBackStack("")
-                                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                    .commit();
-                        } else {
-                            DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(phonesArrayList.get(dateIndex));
-                            fragmentManager1.beginTransaction()
-                                    .replace(R.id.dateFragmnet, datePickerFragment)
-                                    .addToBackStack("")
-                                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                    .commit();
-                        }
-
-                    });
-
-                    viewSeparate = new View(PhonesFragment.this.getContext());
-                    LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, 1);
-                    viewSeparate.setLayoutParams(param);
-                    viewSeparate.setBackgroundColor(getResources().getColor(android.R.color.black));
-                    layout.addView(nameText);
-                    layout.addView(descriptionText);
-                    layout.addView(dateText);
-                    layout.addView(viewSeparate);
-                    final int index = i;
-                    initPopupMenu(nameText, index);
-                    nameText.setOnClickListener(view12 -> {
-                       // currentPhone = index;
-
-                        phone = phonesArrayList.get(index);
-                        System.out.println("Phones id"+phonesArrayList.get(index).getImage());
-                        PhonesFragment.this.showPhones(phonesArrayList.get(index));
-                    });
-                }
-    }
-
-  /*  private void initList(View view) {
-        LinearLayout layout = (LinearLayout) view;
-
-
-     FragmentResultListener fragmentResultListener= new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-
-                neme = result.getString("bundleKeyPhone");
-                daty = result.getString("bundleKey");
-                System.out.println("bundles " + result);
-                for (int i = 0; i < phones.length; i++) {
-                    if (phones[i].getName().matches(neme)){
-                        dateText = (TextView)view.findViewWithTag(i);
-                        dateText.setText(daty);
-                    }
-                }
-            }
-        };
-
-        for (int i = 0; i < phones.length; i++) {
-
-            nameText = new TextView(getContext());
-            nameText.setText(phones[i].getName());
-            nameText.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-            nameText.setTextColor(getResources().getColor(R.color.black));
-            descriptionText = new TextView(getContext());
-            descriptionText.setText(phones[i].getDescriptions());
-            descriptionText.setEllipsize(TextUtils.TruncateAt.END);
-            descriptionText.setLines(1);
-            dateText = new TextView(getContext());
-            dateText.setTag(i);
-            dateText.setText(phones[i].getDate());
-            dateText.setTextColor(getResources().getColor(R.color.black));
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            params.setMargins(10, 0, 0, 10);
-            dateText.setLayoutParams(params);
-            final int dateIndex = i;
-
-            dateText.setOnClickListener(view1 -> {
-
-                requireActivity().getSupportFragmentManager().setFragmentResultListener("key", this , fragmentResultListener);
-                if (PhonesFragment.this.isLand()) {
-                    DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(phones[dateIndex].getName());
-                    requireActivity().getSupportFragmentManager().beginTransaction()
-                            .add(R.id.fragmentDetails, datePickerFragment)
-                            .addToBackStack("")
-                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                            .commit();
-                } else {
-                    DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(phones[dateIndex].getName());
-                    requireActivity().getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.dateFragmnet, datePickerFragment)
-                            .addToBackStack("")
-                            .commit();
-                }
-
-
-            });
-            layout.addView(nameText);
-            layout.addView(descriptionText);
-            layout.addView(dateText);
-            final int index = i;
-            nameText.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    currentPhone = index;
-                    showPhones(index);
-                }
-            });
-
-        }
-    }*/
-
-
 
     private void showPhones(Phones phones) {
 
@@ -465,7 +289,7 @@ public class PhonesFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-       // outState.putInt(CURRENT_PHONE, currentPhone);
+        // outState.putInt(CURRENT_PHONE, currentPhone);
         outState.putString("true", "true");
         outState.putParcelable(CURRENT_PHONE, phone);
         super.onSaveInstanceState(outState);

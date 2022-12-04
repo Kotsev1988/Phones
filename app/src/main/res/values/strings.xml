@@ -12,4 +12,10 @@
     <string name="header_title">Заголовок</string>
     <string name="imageText">Изображение</string>
     <string name="popup_delete">Удалить</string>
+    <string name="Name">введите новое название</string>
+    <string name="DescriptionEdit">введите новое описание</string>
+    <string name="dateEdit">Измените дату</string>
+    <string name="nameEdit">Измениете Название</string>
+    <string name="dateChange">Измениете Дату</string>
+    <string name="saveChanges">Сохранить</string>
 </resources>

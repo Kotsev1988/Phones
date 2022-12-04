@@ -16,9 +16,19 @@
         <item name="actionOverflowButtonStyle">@style/actionOverflowButtonStyle</item>
         <item name="android:actionMenuTextColor">@color/white</item>
 
+        <item name="android:datePickerStyle">@style/SpinnerDatePickerDialogTheme</item>
+
     </style>
 
     <style name="actionOverflowButtonStyle" parent="@style/Widget.AppCompat.ActionButton.Overflow">
         <item name="android:tint">@color/white</item>
     </style>
+    <style name="SpinnerDatePickerDialogTheme" parent="ThemeOverlay.MaterialComponents.Dialog">
+        <item name="android:datePickerStyle">@style/DatePickerStyle</item>
+        <item name="colorControlNormal">@color/teal_200</item>
+    </style>
+    <style name="DatePickerStyle" parent="@android:style/Widget.Material.Light.DatePicker">
+        <item name="android:datePickerMode">spinner</item>
+    </style>
+
 </resources>
