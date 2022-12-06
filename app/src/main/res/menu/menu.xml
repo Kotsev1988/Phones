@@ -14,7 +14,7 @@
 
     <item android:id="@+id/searchOver"
         android:icon="@android:drawable/ic_menu_close_clear_cancel"
-        android:title="@string/search"
+        android:title="@string/searchOver"
         app:showAsAction="always"
         />
     <item android:id="@+id/addItem"

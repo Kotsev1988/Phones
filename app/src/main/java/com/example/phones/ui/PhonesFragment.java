@@ -60,6 +60,7 @@ public class PhonesFragment extends Fragment {
     private Navigation navigation;
     private Publisher publisher;
     private boolean moveToLastPosition;
+    MenuItem menuItemSearchOver, menuItemSearch;
 
     public static PhonesFragment newInstance() {
         return new PhonesFragment();
@@ -213,6 +214,15 @@ public class PhonesFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        for (int i = 0; i < menu.size(); i++) {
+            if (menu.getItem(i).getItemId() == R.id.searchOver){
+                menuItemSearchOver = menu.getItem(i);
+                menuItemSearchOver.setVisible(false);
+            }
+            if (menu.getItem(i).getItemId() == R.id.action_search){
+                menuItemSearch = menu.getItem(i);
+            }
+        }
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -221,9 +231,12 @@ public class PhonesFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
+
         switch (id) {
             case R.id.action_search:
-                item.setVisible(false);
+                menuItemSearch.setVisible(false);
+                menuItemSearchOver.setVisible(true);
+                //item.setVisible(false);
                 searchLinearLayot = requireActivity().findViewById(R.id.searchLinearLayot);
                 searchLinearLayot.setVisibility(View.VISIBLE);
                 search = requireActivity().findViewById(R.id.searchText);
@@ -232,14 +245,12 @@ public class PhonesFragment extends Fragment {
 
                 searchButton = requireActivity().findViewById(R.id.searchButton);
                 searchButton.setVisibility(View.VISIBLE);
-
-
-
                 searchButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         searchPhones(search.getText().toString());
-                        item.setVisible(true);
+                       // menuItemSearch.setVisible(true);
+
                     }
                 });
                 return true;
@@ -262,21 +273,18 @@ public class PhonesFragment extends Fragment {
                 return true;
 
             case R.id.searchOver:
+                menuItemSearchOver.setVisible(false);
+                menuItemSearch.setVisible(true);
+
                 if (search != null && searchButton != null && searchLinearLayot != null) {
                     search.setVisibility(View.VISIBLE);
                     searchButton.setVisibility(View.GONE);
-                    item.setVisible(true);
                     searchLinearLayot.setVisibility(View.INVISIBLE);
                     phoneAdapter.filterList(phonesArrayList);
-                    // init(dataConteiner);
                 }
                 return true;
 
             case R.id.addItem:
-                 /*  phonesArrayList.add(new Phones("New Phone", "Phone Description", R.drawable.iphone, "15.09.2022"));
-                   phoneAdapter.notifyItemInserted(phonesArrayList.size()-1);
-                   recyclerView.scrollToPosition(phonesArrayList.size()-1);
-                   recyclerView.smoothScrollToPosition(phonesArrayList.size()-1);*/
 
                 navigation.addFragment(PhoneFragment.newInstance(), true);
                 publisher.subscribe(new com.example.phones.model.Observer() {
