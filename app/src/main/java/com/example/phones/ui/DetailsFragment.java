@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.example.phones.R;
 import com.example.phones.model.Phones;
+import com.example.phones.repository.MainRepoitory;
 
 public class DetailsFragment extends Fragment {
 
@@ -31,8 +32,10 @@ static final String ARGS = "index";
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState != null)
+        if (savedInstanceState != null) {
             requireActivity().getSupportFragmentManager().popBackStack();
+        }
+
     }
 
     @Override
@@ -49,6 +52,7 @@ static final String ARGS = "index";
         if (arguments!= null){
             System.out.println("arguments "+arguments.toString());
             phones = arguments.getParcelable(ARGS);
+            System.out.println("arguments "+phones.getName());
             ImageView imageView = view.findViewById(R.id.imagePhone);
             TextView textView = view.findViewById(R.id.detailsOfPhone);
             TypedArray typedArray = getResources().obtainTypedArray(R.array.phoneImages);
@@ -92,7 +96,7 @@ static final String ARGS = "index";
         int id = item.getItemId();
         if (id == R.id.action_delete){
             String name = phones.getName();
-            MainViewModel.phonesArrayList.remove(phones);
+            MainRepoitory.phonesArrayList.remove(phones);
             phones = null;
             for (Fragment fragment: requireActivity().getSupportFragmentManager().getFragments()){
                 if (fragment instanceof PhonesFragment){

@@ -3,16 +3,22 @@ package com.example.phones.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Date;
+
 public class Phones implements Parcelable {
     String name;
     String descriptions;
     int image;
-    String date;
-    public Phones(String name, String descriptions, int image, String date){
+    Date date;
+    public Phones(String name, String descriptions, int image, Date date){
         this.name = name;
         this.descriptions = descriptions;
         this.image = image;
         this.date = date;
+    }
+
+    public Phones(){
+
     }
 
 
@@ -40,19 +46,21 @@ public class Phones implements Parcelable {
         this.image = image;
     }
 
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(Date date) {
         this.date = date;
     }
+
+
 
     protected Phones(Parcel in) {
         name = in.readString();
         descriptions = in.readString();
         image = in.readInt();
-        date = in.readString();
+        date = new Date(in.readLong());
     }
 
     public static final Creator<Phones> CREATOR = new Creator<Phones>() {
@@ -78,7 +86,7 @@ public class Phones implements Parcelable {
         parcel.writeString(name);
         parcel.writeString(descriptions);
         parcel.writeInt(image);
-        parcel.writeString(date);
+        parcel.writeLong(date.getTime());
     }
 
 

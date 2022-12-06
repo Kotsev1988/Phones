@@ -1,6 +1,7 @@
 package com.example.phones.ui;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -12,10 +13,12 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.TextUtils;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,32 +34,36 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.phones.R;
+import com.example.phones.model.Navigation;
 import com.example.phones.model.OnItemClickListener;
 import com.example.phones.model.PhoneAdapter;
 import com.example.phones.model.Phones;
+import com.example.phones.model.Publisher;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class PhonesFragment extends Fragment {
 
-    TextView nameText;
-    TextView descriptionText;
-    TextView dateText;
+
     MainViewModel vm;
-    View dataConteiner;
     private ArrayList<Phones> phonesArrayList = new ArrayList<>();
-
-    private static final String CURRENT_PHONE = "phone";
-
     Phones phone;
-    View viewSeparate;
-
-
     EditText search;
     LinearLayout searchLinearLayot;
     Button searchButton;
     RecyclerView recyclerView;
-    int pos;
+    PhoneAdapter phoneAdapter;
+    private static final String CURRENT_PHONE = "phone";
+    private static final int DURATION = 5000;
+
+    private Navigation navigation;
+    private Publisher publisher;
+    private boolean moveToLastPosition;
+
+    public static PhonesFragment newInstance() {
+        return new PhonesFragment();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,40 +76,65 @@ public class PhonesFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_phones, container, false);
         vm = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+
         if (savedInstanceState == null) {
             if (phonesArrayList.size() == 0) {
-                phonesArrayList = vm.getPhonesArrayList(true);
+                phonesArrayList = vm.getPhonesArrayList();
+                phone = phonesArrayList.get(0);
             }
-        }else if (savedInstanceState.getString("true")!=null){
-            phonesArrayList = vm.getPhonesArrayList(false);
+        } else if (savedInstanceState.getString("true") != null) {
+            //phonesArrayList = vm.getPhonesArrayList();
         }
         recyclerView = rootView.findViewById(R.id.recyclerView);
-        initRecyclerView(recyclerView, phonesArrayList);
+        initRecyclerView();
         return rootView;
     }
 
-    private void initRecyclerView(RecyclerView recyclerView, ArrayList<Phones> phonesArrayList) {
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        MainActivity activity = (MainActivity) context;
+        navigation = activity.getNavigation();
+        publisher = activity.getPublisher();
+    }
+
+    @Override
+    public void onDetach() {
+        navigation = null;
+        publisher = null;
+        super.onDetach();
+    }
+
+    private void initRecyclerView() {
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
-        PhoneAdapter phoneAdapter = new PhoneAdapter(phonesArrayList);
+        phoneAdapter = new PhoneAdapter(phonesArrayList, this);
+
         recyclerView.setAdapter(phoneAdapter);
+
+        DefaultItemAnimator defaultItemAnimator = new DefaultItemAnimator();
+        defaultItemAnimator.setAddDuration(DURATION);
+        defaultItemAnimator.setRemoveDuration(DURATION);
+        recyclerView.setItemAnimator(defaultItemAnimator);
+
+        if (moveToLastPosition) {
+            recyclerView.smoothScrollToPosition(phonesArrayList.size() - 1);
+            moveToLastPosition = false;
+        }
 
 
         phoneAdapter.setClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                System.out.println("Click On Card " + position + " " + view);
                 phone = phonesArrayList.get(position);
-                pos = position;
-                System.out.println("Position "+pos);
-                showPhones(phonesArrayList.get(position));
+                showPhones(vm.getPhone(position));
             }
 
             @Override
             public void onEditIconClick(View v, int position) {
                 phone = phonesArrayList.get(position);
-                EditFragment editFragment = EditFragment.newInstance(position);
+                EditFragment editFragment = EditFragment.newInstance(position, phone.getImage());
 
                 requireActivity().getSupportFragmentManager()
                         .beginTransaction()
@@ -116,7 +148,7 @@ public class PhonesFragment extends Fragment {
             @Override
             public void onLingClick(View v, int pos) {
 
-                initPopupMenu(v, pos);
+                //initPopupMenu(v, pos);
             }
         });
     }
@@ -125,20 +157,19 @@ public class PhonesFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        vm.getPhone1().observe(getViewLifecycleOwner(), new Observer<ArrayList<Phones>>() {
 
-
-        phone = phonesArrayList.get(0);
-
-        vm.getPhone1().observe(getViewLifecycleOwner(), new Observer<Phones>() {
             @Override
-            public void onChanged(Phones phones) {
-                dateText = (TextView) view.findViewWithTag(phones.getName());
-                dateText.setText(phones.getDate());
+            public void onChanged(ArrayList<Phones> phones) {
+                phonesArrayList = phones;
+                phoneAdapter.notifyDataSetChanged();
+
             }
         });
 
         if (savedInstanceState != null) {
             phone = savedInstanceState.getParcelable(CURRENT_PHONE);
+            System.out.println("getSavedPhone "+phone.getName());
         }
 
         if (isLand()) {
@@ -154,6 +185,33 @@ public class PhonesFragment extends Fragment {
     }
 
     @Override
+    public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v, @Nullable ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater menuInflater = requireActivity().getMenuInflater();
+        menuInflater.inflate(R.menu.card_menu, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        int position = phoneAdapter.getMenuPosition();
+        System.out.println("Position " + position);
+        switch (item.getItemId()) {
+            case R.id.action_update:
+
+                vm.update(position, new Phones("Some Phone", "Not bad phone", R.drawable.samsung, new Date()));
+                phoneAdapter.notifyItemChanged(position);
+                return true;
+            case R.id.action_delet:
+                vm.delete(position);
+                phoneAdapter.notifyItemRemoved(position);
+                recyclerView.scrollToPosition(position);
+                recyclerView.smoothScrollToPosition(position);
+                return true;
+        }
+        return super.onContextItemSelected(item);
+    }
+
+    @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -162,6 +220,7 @@ public class PhonesFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
+
         switch (id) {
             case R.id.action_search:
                 item.setVisible(false);
@@ -169,13 +228,18 @@ public class PhonesFragment extends Fragment {
                 searchLinearLayot.setVisibility(View.VISIBLE);
                 search = requireActivity().findViewById(R.id.searchText);
                 search.setVisibility(View.VISIBLE);
+
+
                 searchButton = requireActivity().findViewById(R.id.searchButton);
                 searchButton.setVisibility(View.VISIBLE);
+
+
 
                 searchButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         searchPhones(search.getText().toString());
+                        item.setVisible(true);
                     }
                 });
                 return true;
@@ -199,12 +263,35 @@ public class PhonesFragment extends Fragment {
 
             case R.id.searchOver:
                 if (search != null && searchButton != null && searchLinearLayot != null) {
-                    search.setVisibility(View.GONE);
+                    search.setVisibility(View.VISIBLE);
                     searchButton.setVisibility(View.GONE);
                     item.setVisible(true);
-                    searchLinearLayot.setVisibility(View.GONE);
+                    searchLinearLayot.setVisibility(View.INVISIBLE);
+                    phoneAdapter.filterList(phonesArrayList);
                     // init(dataConteiner);
                 }
+                return true;
+
+            case R.id.addItem:
+                 /*  phonesArrayList.add(new Phones("New Phone", "Phone Description", R.drawable.iphone, "15.09.2022"));
+                   phoneAdapter.notifyItemInserted(phonesArrayList.size()-1);
+                   recyclerView.scrollToPosition(phonesArrayList.size()-1);
+                   recyclerView.smoothScrollToPosition(phonesArrayList.size()-1);*/
+
+                navigation.addFragment(PhoneFragment.newInstance(), true);
+                publisher.subscribe(new com.example.phones.model.Observer() {
+                    @Override
+                    public void updatePhoneCard(Phones phones) {
+                        vm.add(phones);
+                        phoneAdapter.notifyItemInserted(phonesArrayList.size() - 1);
+                        moveToLastPosition = true;
+                    }
+                });
+
+                return true;
+            case R.id.clear:
+                phonesArrayList.clear();
+                phoneAdapter.notifyDataSetChanged();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -226,8 +313,9 @@ public class PhonesFragment extends Fragment {
                     public void actionPositive(String s) {
                         if (menuItem.getItemId() == R.id.popup_delete) {
                             String name = phonesArrayList.get(index).getName();
-                            phonesArrayList.remove(index);
-                            init();
+                            vm.delete(index);
+                            // phonesArrayList.remove(index);
+                            // phoneAdapter.notifyItemRemoved(index);
                             phone = phonesArrayList.get(index);
                             Toast.makeText(requireActivity(), "Заметка " + name + " удалена", Toast.LENGTH_LONG).show();
                         }
@@ -249,19 +337,20 @@ public class PhonesFragment extends Fragment {
 
     }
 
-    public void init(){
+    public void init() {
         recyclerView.getAdapter().notifyDataSetChanged();
         phone = phonesArrayList.get(0);
     }
 
     private void searchPhones(String phone) {
+        ArrayList<Phones> newList = new ArrayList<>();
         for (int i = 0; i < phonesArrayList.size(); i++) {
             if (phonesArrayList.get(i).getName().equals(phone)) {
                 System.out.println("hasMatches " + phonesArrayList.get(i).getName() + " = " + phone);
+                newList.add(phonesArrayList.get(i));
 
-                //initAfterSearch(dataConteiner,phonesArrayList.get(i));
-                break;
             }
+            phoneAdapter.filterList(newList);
         }
     }
 
@@ -290,6 +379,7 @@ public class PhonesFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         // outState.putInt(CURRENT_PHONE, currentPhone);
+        System.out.println("savedPhone "+phone.getName());
         outState.putString("true", "true");
         outState.putParcelable(CURRENT_PHONE, phone);
         super.onSaveInstanceState(outState);

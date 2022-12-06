@@ -18,4 +18,7 @@
     <string name="nameEdit">Измениете Название</string>
     <string name="dateChange">Измениете Дату</string>
     <string name="saveChanges">Сохранить</string>
+    <string name="addItem">добавить</string>
+    <string name="clear">очистить</string>
+    <string name="update">обновить</string>
 </resources>

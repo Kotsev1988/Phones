@@ -7,30 +7,29 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.phones.R;
 import com.example.phones.model.Phones;
+import com.example.phones.repository.MainRepoitory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 
 
 public class MainViewModel extends ViewModel {
 
 
-    public static ArrayList<Phones> phonesArrayList = new ArrayList<>();
 
 
-    private final MutableLiveData<Phones> phonesVM = new MutableLiveData<>();
-    LiveData<Phones> phone1 = phonesVM;
+    MainRepoitory repoitory = new MainRepoitory();
 
 
-    public LiveData<Phones> getPhone1() {
+    private final MutableLiveData<ArrayList<Phones>> phonesVM = new MutableLiveData<>();
+    LiveData<ArrayList<Phones>> phone1 = phonesVM;
+    public LiveData<ArrayList<Phones>> getPhone1() {
         return phone1;
     }
-
-
-
-
     public void setDate(Phones phone, String date) {
 
-        for (int i = 0; i < phonesArrayList.size(); i++) {
+      /*  for (int i = 0; i < phonesArrayList.size(); i++) {
             if (phonesArrayList.get(i).equals(phone)) {
 
                 System.out.println("Equals " + phonesArrayList.get(i).getName());
@@ -38,27 +37,32 @@ public class MainViewModel extends ViewModel {
                 phonesVM.setValue(phonesArrayList.get(i));
                 break;
             }
-        }
+        }*/
 
+    }
+
+    public void update(int pos, Phones phones){
+        repoitory.update(pos, phones);
+        phonesVM.postValue(repoitory.getData());
     }
 
 
     public void delete(int pos){
-        phonesArrayList.remove(pos);
-        for (int i = 0; i < phonesArrayList.size(); i++) {
-                phonesVM.setValue(phonesArrayList.get(i));
-        }
+        repoitory.delete(pos);
+        phonesVM.postValue(repoitory.getData());
+
     }
 
-    public ArrayList<Phones> getPhonesArrayList(boolean isSetup) {
-        if (isSetup) {
-            phonesArrayList.clear();
-            phonesArrayList.add(new Phones("Samsung", "Samsung is cool phone", R.drawable.samsung, "14.11.2022"));
-            phonesArrayList.add(new Phones("Iphone", "Iphone is popular phone", R.drawable.iphone, "14.11.2022"));
-            phonesArrayList.add(new Phones("Xiaomi", "Xiamoi  it is the second largest manufacturer of smartphones in the world, most of which run the MIUI operating system.", R.drawable.xiaomi, "14.11.2022"));
-            phonesArrayList.add(new Phones("Nokia", "Nokia is a Finnish multinational telecommunications, information technology, and consumer electronics corporation, established in 1865", R.drawable.nokia, "14.11.2022"));
-            phonesArrayList.add(new Phones("Honor", "Honor is is a smartphone brand majority owned by a state-owned enterprise controlled by the municipal government of Shenzhe", R.drawable.honor, "14.11.2022"));
-        }
-        return phonesArrayList;
+    public Phones getPhone(int pos){
+        return repoitory.getPhone(pos);
     }
+
+    public void add(Phones phones){
+        repoitory.add(phones);
+    }
+
+    public ArrayList<Phones> getPhonesArrayList() {
+          return repoitory.getData();
+    }
+
 }

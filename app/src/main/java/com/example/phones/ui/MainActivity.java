@@ -14,7 +14,9 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.phones.R;
+import com.example.phones.model.Navigation;
 import com.example.phones.model.Phones;
+import com.example.phones.model.Publisher;
 import com.example.phones.ui.PhonesFragment;
 import com.google.android.material.navigation.NavigationView;
 
@@ -22,22 +24,29 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Navigation navigation;
+    private Publisher publisher = new Publisher();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        navigation = new Navigation(getSupportFragmentManager());
+
         initToolbar();
 
         initToolbarDrawer();
 
-        if (savedInstanceState==null){
+        navigation.addFragment(PhonesFragment.newInstance(), false);
+
+       /* if (savedInstanceState==null){
             PhonesFragment phonesFragment = new PhonesFragment();
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.fragment, phonesFragment)
                     .commit();
-        }
+        }*/
 
       /* if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
             PhonesFragment phonesFragment = new PhonesFragment();
@@ -110,5 +119,17 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return super.onSupportNavigateUp();
+    }
 
+    public Navigation getNavigation() {
+        return navigation;
+    }
+
+    public Publisher getPublisher() {
+        return publisher;
+    }
 }
