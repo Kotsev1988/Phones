@@ -39,14 +39,16 @@ import com.example.phones.model.OnItemClickListener;
 import com.example.phones.model.PhoneAdapter;
 import com.example.phones.model.Phones;
 import com.example.phones.model.Publisher;
+import com.example.phones.repository.MainRepoitory;
 
 import java.util.ArrayList;
 import java.util.Date;
 
 public class PhonesFragment extends Fragment {
 
-
     MainViewModel vm;
+    ModelViewFactory modelViewFactory;
+    MainRepoitory repository = new MainRepoitory();
     private ArrayList<Phones> phonesArrayList = new ArrayList<>();
     Phones phone;
     EditText search;
@@ -76,16 +78,19 @@ public class PhonesFragment extends Fragment {
         setHasOptionsMenu(true);
 
         View rootView = inflater.inflate(R.layout.fragment_phones, container, false);
-        vm = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+        modelViewFactory = new ModelViewFactory(repository);
+        vm = new ViewModelProvider(requireActivity(), modelViewFactory).get(MainViewModel.class);
 
-        if (savedInstanceState == null) {
+        phonesArrayList = repository.getData();
+        phone = phonesArrayList.get(0);
+        /*if (savedInstanceState == null) {
             if (phonesArrayList.size() == 0) {
-                phonesArrayList = vm.getPhonesArrayList();
+                phonesArrayList = repository.getData();
                 phone = phonesArrayList.get(0);
             }
         } else if (savedInstanceState.getString("true") != null) {
             //phonesArrayList = vm.getPhonesArrayList();
-        }
+        }*/
         recyclerView = rootView.findViewById(R.id.recyclerView);
         initRecyclerView();
         return rootView;
@@ -129,7 +134,7 @@ public class PhonesFragment extends Fragment {
             @Override
             public void onItemClick(View view, int position) {
                 phone = phonesArrayList.get(position);
-                showPhones(vm.getPhone(position));
+                showPhones(repository.getPhone(position));
             }
 
             @Override
@@ -142,13 +147,10 @@ public class PhonesFragment extends Fragment {
                         .replace(R.id.fragment, editFragment)
                         .addToBackStack("")
                         .commit();
-
-
             }
 
             @Override
             public void onLingClick(View v, int pos) {
-
                 //initPopupMenu(v, pos);
             }
         });
@@ -168,10 +170,10 @@ public class PhonesFragment extends Fragment {
             }
         });
 
-        if (savedInstanceState != null) {
+       /* if (savedInstanceState != null) {
             phone = savedInstanceState.getParcelable(CURRENT_PHONE);
             System.out.println("getSavedPhone "+phone.getName());
-        }
+        }*/
 
         if (isLand()) {
 
@@ -236,7 +238,6 @@ public class PhonesFragment extends Fragment {
             case R.id.action_search:
                 menuItemSearch.setVisible(false);
                 menuItemSearchOver.setVisible(true);
-                //item.setVisible(false);
                 searchLinearLayot = requireActivity().findViewById(R.id.searchLinearLayot);
                 searchLinearLayot.setVisibility(View.VISIBLE);
                 search = requireActivity().findViewById(R.id.searchText);
@@ -245,14 +246,7 @@ public class PhonesFragment extends Fragment {
 
                 searchButton = requireActivity().findViewById(R.id.searchButton);
                 searchButton.setVisibility(View.VISIBLE);
-                searchButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        searchPhones(search.getText().toString());
-                       // menuItemSearch.setVisible(true);
-
-                    }
-                });
+                searchButton.setOnClickListener(view -> searchPhones(search.getText().toString()));
                 return true;
             case R.id.action_exit:
                 MyDialogFragmentClose myDialogFragmentClose = new MyDialogFragmentClose();
@@ -269,13 +263,11 @@ public class PhonesFragment extends Fragment {
                         return;
                     }
                 });
-
                 return true;
 
             case R.id.searchOver:
                 menuItemSearchOver.setVisible(false);
                 menuItemSearch.setVisible(true);
-
                 if (search != null && searchButton != null && searchLinearLayot != null) {
                     search.setVisibility(View.VISIBLE);
                     searchButton.setVisibility(View.GONE);
@@ -285,16 +277,23 @@ public class PhonesFragment extends Fragment {
                 return true;
 
             case R.id.addItem:
+                vm.add(new Phones("Samsung", "cool", R.drawable.samsung, new Date()));
 
-                navigation.addFragment(PhoneFragment.newInstance(), true);
+                phoneAdapter.notifyItemInserted(phonesArrayList.size() - 1);
+
+                /*navigation.addFragment(PhoneFragment.newInstance(), true);
                 publisher.subscribe(new com.example.phones.model.Observer() {
                     @Override
                     public void updatePhoneCard(Phones phones) {
                         vm.add(phones);
-                        phoneAdapter.notifyItemInserted(phonesArrayList.size() - 1);
+                        if (phonesArrayList.size()==0){
+                            phoneAdapter.notifyItemInserted(phonesArrayList.size());
+                        }else {
+                            phoneAdapter.notifyItemInserted(phonesArrayList.size() - 1);
+                        }
                         moveToLastPosition = true;
                     }
-                });
+                });*/
 
                 return true;
             case R.id.clear:
@@ -322,8 +321,6 @@ public class PhonesFragment extends Fragment {
                         if (menuItem.getItemId() == R.id.popup_delete) {
                             String name = phonesArrayList.get(index).getName();
                             vm.delete(index);
-                            // phonesArrayList.remove(index);
-                            // phoneAdapter.notifyItemRemoved(index);
                             phone = phonesArrayList.get(index);
                             Toast.makeText(requireActivity(), "Заметка " + name + " удалена", Toast.LENGTH_LONG).show();
                         }
@@ -386,10 +383,9 @@ public class PhonesFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        // outState.putInt(CURRENT_PHONE, currentPhone);
-        System.out.println("savedPhone "+phone.getName());
-        outState.putString("true", "true");
-        outState.putParcelable(CURRENT_PHONE, phone);
+      //  System.out.println("savedPhone "+phone.getName());
+        //  outState.putString("true", "true");
+       // outState.putParcelable(CURRENT_PHONE, phone);
         super.onSaveInstanceState(outState);
 
     }

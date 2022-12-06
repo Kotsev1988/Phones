@@ -16,19 +16,19 @@ import java.util.Date;
 
 public class MainViewModel extends ViewModel {
 
+    MainRepoitory repoitory ;
 
-
-
-    MainRepoitory repoitory = new MainRepoitory();
-
+    public MainViewModel(MainRepoitory repoitory){
+        this.repoitory =repoitory;
+    }
 
     private final MutableLiveData<ArrayList<Phones>> phonesVM = new MutableLiveData<>();
     LiveData<ArrayList<Phones>> phone1 = phonesVM;
     public LiveData<ArrayList<Phones>> getPhone1() {
         return phone1;
     }
-    public void setDate(Phones phone, String date) {
 
+    public void setDate(Phones phone, String date) {
       /*  for (int i = 0; i < phonesArrayList.size(); i++) {
             if (phonesArrayList.get(i).equals(phone)) {
 
@@ -38,7 +38,6 @@ public class MainViewModel extends ViewModel {
                 break;
             }
         }*/
-
     }
 
     public void update(int pos, Phones phones){
@@ -46,11 +45,9 @@ public class MainViewModel extends ViewModel {
         phonesVM.postValue(repoitory.getData());
     }
 
-
     public void delete(int pos){
         repoitory.delete(pos);
         phonesVM.postValue(repoitory.getData());
-
     }
 
     public Phones getPhone(int pos){
@@ -61,8 +58,5 @@ public class MainViewModel extends ViewModel {
         repoitory.add(phones);
     }
 
-    public ArrayList<Phones> getPhonesArrayList() {
-          return repoitory.getData();
-    }
-
+    public ArrayList<Phones> getPhonesArrayList() {return repoitory.getData();}
 }
