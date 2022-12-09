@@ -1,6 +1,7 @@
 package com.example.phones.repository;
 
 import com.example.phones.R;
+import com.example.phones.model.PhoneAdapter;
 import com.example.phones.model.Phones;
 
 import java.util.ArrayList;
@@ -8,7 +9,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 public class MainRepoitory implements Repository{
-    public static ArrayList<Phones> phonesArrayList =new ArrayList<Phones>( Arrays.asList(
+   /* public static ArrayList<Phones> phonesArrayList =new ArrayList<Phones>( Arrays.asList(
 
             new Phones("Samsung", "Samsung is cool phone", R.drawable.samsung, new Date()),
             new Phones("Iphone", "Iphone is popular phone", R.drawable.iphone, new Date()),
@@ -17,7 +18,9 @@ public class MainRepoitory implements Repository{
             new Phones("Honor", "Honor is is a smartphone brand majority owned by a state-owned enterprise controlled by the municipal government of Shenzhe", R.drawable.honor, new Date())
 
     )
-    );
+    );*/
+
+    public ArrayList<Phones> phonesArrayList =new ArrayList<Phones>();
     @Override
     public ArrayList<Phones> getData() {
         return phonesArrayList;
@@ -42,6 +45,14 @@ public class MainRepoitory implements Repository{
     public Phones getPhone(int pos) {
         return phonesArrayList.get(pos);
     }
+
+    @Override
+    public void addNewPhones(ArrayList<Phones> phones) {
+        phonesArrayList = phones;
+    }
+
+
+
 
 
 }

@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.phones.R;
+import com.example.phones.model.PhoneAdapter;
 import com.example.phones.model.Phones;
 import com.example.phones.repository.MainRepoitory;
 
@@ -57,6 +58,12 @@ public class MainViewModel extends ViewModel {
     public void add(Phones phones){
         repoitory.add(phones);
     }
+
+    public void addNewPhones(ArrayList<Phones> phones){
+        repoitory.addNewPhones(phones);
+    }
+
+
 
     public ArrayList<Phones> getPhonesArrayList() {return repoitory.getData();}
 }

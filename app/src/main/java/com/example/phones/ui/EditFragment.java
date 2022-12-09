@@ -3,6 +3,8 @@ package com.example.phones.ui;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -20,7 +22,9 @@ import android.widget.EditText;
 
 import com.example.phones.R;
 import com.example.phones.model.Phones;
+import com.google.gson.GsonBuilder;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -34,6 +38,7 @@ public class EditFragment extends Fragment {
     MainViewModel vm;
     Phones phones;
     int img;
+    SharedPreferences sharedPreferences;
 
 
     public EditFragment() {
@@ -54,7 +59,8 @@ public class EditFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        sharedPreferences.getString(PhonesFragment.KEY, null);
     }
 
     @Override
@@ -112,6 +118,11 @@ public class EditFragment extends Fragment {
                 }
                 vm.update(position, phones);
 
+               ArrayList<Phones> phonesArrayList =vm.getPhonesArrayList();
+                String phoneForUpdate = new GsonBuilder().create().toJson(phonesArrayList);
+                sharedPreferences.edit().putString(PhonesFragment.KEY, phoneForUpdate).apply();
+
+                //vm.addNewPhones(vm.getPhonesArrayList());
                 requireActivity().getSupportFragmentManager().popBackStack();
             }
 

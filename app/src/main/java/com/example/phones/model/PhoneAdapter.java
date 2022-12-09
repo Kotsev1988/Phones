@@ -26,6 +26,10 @@ public class PhoneAdapter extends RecyclerView.Adapter<PhoneAdapter.ViewHolder> 
     PhonesFragment phonesFragment;
     ArrayList<Phones> phones;
 
+    public void setNewDataPhone(ArrayList<Phones> newPhones){
+        this.phones = newPhones;
+    }
+
     public int getMenuPosition() {
         return menuPosition;
     }
@@ -65,6 +69,26 @@ public class PhoneAdapter extends RecyclerView.Adapter<PhoneAdapter.ViewHolder> 
         private TextView date;
 
 
+        public ImageView getImage() {
+            return image;
+        }
+
+        public ImageView getEdit() {
+            return edit;
+        }
+
+        public TextView getName() {
+            return name;
+        }
+
+        public TextView getDescription() {
+            return description;
+        }
+
+        public TextView getDate() {
+            return date;
+        }
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.phoneName);
@@ -99,6 +123,7 @@ public class PhoneAdapter extends RecyclerView.Adapter<PhoneAdapter.ViewHolder> 
                     clickListener.onEditIconClick(itemView, getAdapterPosition());
                 }
             });
+
 
         }
 

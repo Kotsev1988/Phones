@@ -2,6 +2,7 @@ package com.example.phones.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -40,7 +41,10 @@ import com.example.phones.model.PhoneAdapter;
 import com.example.phones.model.Phones;
 import com.example.phones.model.Publisher;
 import com.example.phones.repository.MainRepoitory;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -64,6 +68,9 @@ public class PhonesFragment extends Fragment {
     private boolean moveToLastPosition;
     MenuItem menuItemSearchOver, menuItemSearch;
 
+    private SharedPreferences sharedPreferences = null;
+    public static final String KEY = "KEY";
+
     public static PhonesFragment newInstance() {
         return new PhonesFragment();
     }
@@ -71,6 +78,7 @@ public class PhonesFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
     }
 
     @Override
@@ -82,7 +90,7 @@ public class PhonesFragment extends Fragment {
         vm = new ViewModelProvider(requireActivity(), modelViewFactory).get(MainViewModel.class);
 
         phonesArrayList = repository.getData();
-        phone = phonesArrayList.get(0);
+       // phone = phonesArrayList.get(0);
         /*if (savedInstanceState == null) {
             if (phonesArrayList.size() == 0) {
                 phonesArrayList = repository.getData();
@@ -128,6 +136,22 @@ public class PhonesFragment extends Fragment {
             recyclerView.smoothScrollToPosition(phonesArrayList.size() - 1);
             moveToLastPosition = false;
         }
+        String saved = sharedPreferences.getString(KEY, null);
+        if (saved == null){
+            Toast.makeText(getContext(), "Empty", Toast.LENGTH_SHORT).show();
+        }else{
+
+            try{
+                Type type = new TypeToken<ArrayList<Phones>>(){}.getType();
+               ArrayList<Phones> phones = new GsonBuilder().create().fromJson(saved, type);
+
+                System.out.println("Phones "+phones.size());
+                vm.addNewPhones(phones);
+                phoneAdapter.setNewDataPhone(phones);
+            }catch(Exception e){
+                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+            }
+        }
 
 
         phoneAdapter.setClickListener(new OnItemClickListener() {
@@ -139,7 +163,7 @@ public class PhonesFragment extends Fragment {
 
             @Override
             public void onEditIconClick(View v, int position) {
-                phone = phonesArrayList.get(position);
+                phone = vm.getPhonesArrayList().get(position);
                 EditFragment editFragment = EditFragment.newInstance(position, phone.getImage());
 
                 requireActivity().getSupportFragmentManager()
@@ -202,11 +226,23 @@ public class PhonesFragment extends Fragment {
             case R.id.action_update:
 
                 vm.update(position, new Phones("Some Phone", "Not bad phone", R.drawable.samsung, new Date()));
-                phoneAdapter.notifyItemChanged(position);
+                phonesArrayList =vm.getPhonesArrayList();
+                String phoneForUpdate = new GsonBuilder().create().toJson(phonesArrayList);
+                sharedPreferences.edit().putString(KEY, phoneForUpdate).apply();
+
+                vm.addNewPhones(vm.getPhonesArrayList());
+               // phoneAdapter.notifyItemChanged(position);
                 return true;
             case R.id.action_delet:
                 vm.delete(position);
-                phoneAdapter.notifyItemRemoved(position);
+
+                phonesArrayList =vm.getPhonesArrayList();
+                String phoneForSaving = new GsonBuilder().create().toJson(phonesArrayList);
+                sharedPreferences.edit().putString(KEY, phoneForSaving).apply();
+
+                vm.addNewPhones(vm.getPhonesArrayList());
+              //  phoneAdapter.notifyItemInserted(phonesArrayList.size() - 1);
+               // phoneAdapter.notifyItemRemoved(position);
                 recyclerView.scrollToPosition(position);
                 recyclerView.smoothScrollToPosition(position);
                 return true;
@@ -277,15 +313,26 @@ public class PhonesFragment extends Fragment {
                 return true;
 
             case R.id.addItem:
-                vm.add(new Phones("Samsung", "cool", R.drawable.samsung, new Date()));
 
-                phoneAdapter.notifyItemInserted(phonesArrayList.size() - 1);
+              //  Phones phones = new Phones("Telephone", "Nice phone", R.id.imagePhone, new Date());
+                phonesArrayList= vm.getPhonesArrayList();
+               // phonesArrayList.add(phones);
+                String phoneForSaving = new GsonBuilder().create().toJson(phonesArrayList);
+                sharedPreferences.edit().putString(KEY, phoneForSaving).apply();
 
-                /*navigation.addFragment(PhoneFragment.newInstance(), true);
+                //vm.add(phones);
+               // vm.addNewPhones(vm.getPhonesArrayList());
+               // phoneAdapter.notifyItemInserted(phonesArrayList.size() - 1);
+
+                navigation.addFragment(PhoneFragment.newInstance(), true);
                 publisher.subscribe(new com.example.phones.model.Observer() {
                     @Override
                     public void updatePhoneCard(Phones phones) {
                         vm.add(phones);
+                        phonesArrayList= vm.getPhonesArrayList();
+                        // phonesArrayList.add(phones);
+                        String phoneForSaving = new GsonBuilder().create().toJson(phonesArrayList);
+                        sharedPreferences.edit().putString(KEY, phoneForSaving).apply();
                         if (phonesArrayList.size()==0){
                             phoneAdapter.notifyItemInserted(phonesArrayList.size());
                         }else {
@@ -293,11 +340,14 @@ public class PhonesFragment extends Fragment {
                         }
                         moveToLastPosition = true;
                     }
-                });*/
+                });
 
                 return true;
             case R.id.clear:
-                phonesArrayList.clear();
+                vm.getPhonesArrayList().clear();
+                String phoneForClear = new GsonBuilder().create().toJson(phonesArrayList);
+                vm.addNewPhones(vm.getPhonesArrayList());
+                sharedPreferences.edit().putString(KEY, phoneForClear).apply();
                 phoneAdapter.notifyDataSetChanged();
                 return true;
         }

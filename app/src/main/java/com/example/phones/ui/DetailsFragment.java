@@ -96,7 +96,7 @@ static final String ARGS = "index";
         int id = item.getItemId();
         if (id == R.id.action_delete){
             String name = phones.getName();
-            MainRepoitory.phonesArrayList.remove(phones);
+            //MainRepoitory.phonesArrayList.remove(phones);
             phones = null;
             for (Fragment fragment: requireActivity().getSupportFragmentManager().getFragments()){
                 if (fragment instanceof PhonesFragment){
